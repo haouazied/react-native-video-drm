@@ -24,6 +24,10 @@ static NSString *const externalPlaybackActive = @"externalPlaybackActive";
 static int const RCTVideoUnset = -1;
 static NSString * const MediaSelectionGroupKey = @"MediaSelectionGroupKey";
 static NSString * const MediaSelectionOptionKey = @"MediaSelectionOptionKey";
+static NSString* const pitchAlgorithmLowQualityZeroLatency = @"lowQualityZeroLatency";
+static NSString* const pitchAlgorithmSpectral = @"spectral";
+static NSString* const pitchAlgorithmTimeDomain = @"timeDomain";
+static NSString* const pitchAlgorithmVarispeed = @"varispeed";
 static int downloadedTask = 0;
 static NSMutableDictionary<AVAssetDownloadTask *, AVMediaSelection *> *mediaSelectionMap;
 AVAssetDownloadURLSession *assetDownloadURLSession;
@@ -64,6 +68,7 @@ AssetPersistenceManager *assetPersistenceManager;
     AVPlayerItem *_playerItem;
     NSString* originalLink;
     NSString* skdLink;
+    NSString * _pitchAlgorithm;
     // AVPlayerItemAccessLog *_playerItemAccess;
     NSMutableArray *bookLinks ;
     NSDictionary *_source;
@@ -157,6 +162,7 @@ AssetPersistenceManager *assetPersistenceManager;
         _playbackStalled = NO;
         _rate = 1.0;
         _volume = 1.0;
+        _pitchAlgorithm = pitchAlgorithmLowQualityZeroLatency;
         _resizeMode = @"AVLayerVideoGravityResizeAspectFill";
         _fullscreenAutorotate = YES;
         _fullscreenOrientation = @"all";
@@ -464,6 +470,7 @@ AssetPersistenceManager *assetPersistenceManager;
             [self addPlayerItemObservers];
             [self setFilter:self->_filterName];
             [self setMaxBitRate:self->_maxBitRate];
+            [self setPitchAlgorithm:self->_pitchAlgorithm];
             
             [_player pause];
             
@@ -605,6 +612,21 @@ AssetPersistenceManager *assetPersistenceManager;
     return  output;
 }
 
+- (void)setPitchAlgorithm:(NSString *)pitchAlgorithm
+{
+  _pitchAlgorithm = pitchAlgorithm;
+
+  if ([_pitchAlgorithm isEqualToString:pitchAlgorithmLowQualityZeroLatency]) {
+    _playerItem.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithmLowQualityZeroLatency;
+  } else if ([_pitchAlgorithm isEqualToString:pitchAlgorithmSpectral]) {
+    _playerItem.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithmSpectral;
+  } else if ([_pitchAlgorithm isEqualToString:pitchAlgorithmTimeDomain]) {
+    _playerItem.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithmTimeDomain;
+  } else if ([_pitchAlgorithm isEqualToString:pitchAlgorithmVarispeed]) {
+    _playerItem.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithmVarispeed;
+  }
+
+}
 
 -(NSURL*)contentKeyLocationForAsset:(NSString*)assetId accountId:(NSString*)accId error:(NSError**)error {
 
@@ -1296,7 +1318,7 @@ AssetPersistenceManager *assetPersistenceManager;
     } else {
         // Fallback on earlier versions
     }
-    
+    [self setPitchAlgorithm:_pitchAlgorithm];
     [self setMaxBitRate:_maxBitRate];
     [self setSelectedAudioTrack:_selectedAudioTrack];
     [self setSelectedTextTrack:_selectedTextTrack];
