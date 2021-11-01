@@ -577,7 +577,7 @@ Video.propTypes = {
     'spectral',
     'timeDomain',
     'varispeed',
-  ])
+  ]),
   pictureInPicture: PropTypes.bool,
   playInBackground: PropTypes.bool,
   preferredForwardBufferDuration: PropTypes.number,
