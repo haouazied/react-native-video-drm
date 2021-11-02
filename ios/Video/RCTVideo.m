@@ -68,7 +68,7 @@ AssetPersistenceManager *assetPersistenceManager;
     AVPlayerItem *_playerItem;
     NSString* originalLink;
     NSString* skdLink;
-    NSString * _pitchAlgorithm;
+    NSString* _pitchAlgorithm;
     // AVPlayerItemAccessLog *_playerItemAccess;
     NSMutableArray *bookLinks ;
     NSDictionary *_source;
@@ -116,8 +116,6 @@ AssetPersistenceManager *assetPersistenceManager;
     float _volume;
     float _rate;
     float _maxBitRate;
-   
-    
     BOOL _automaticallyWaitsToMinimizeStalling;
     BOOL _muted;
     BOOL _paused;
@@ -449,9 +447,7 @@ AssetPersistenceManager *assetPersistenceManager;
 {
     
     
-    
-    
-         
+
     
     [self saveDurationWatched];
     
@@ -615,16 +611,17 @@ AssetPersistenceManager *assetPersistenceManager;
 - (void)setPitchAlgorithm:(NSString *)pitchAlgorithm
 {
   _pitchAlgorithm = pitchAlgorithm;
-
-  if ([_pitchAlgorithm isEqualToString:pitchAlgorithmLowQualityZeroLatency]) {
-    _playerItem.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithmLowQualityZeroLatency;
-  } else if ([_pitchAlgorithm isEqualToString:pitchAlgorithmSpectral]) {
-    _playerItem.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithmSpectral;
-  } else if ([_pitchAlgorithm isEqualToString:pitchAlgorithmTimeDomain]) {
+  
+//  if ([_pitchAlgorithm isEqualToString:pitchAlgorithmLowQualityZeroLatency]) {
+//    _playerItem.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithmLowQualityZeroLatency;
+//  } else if ([_pitchAlgorithm isEqualToString:pitchAlgorithmSpectral]) {
+//    _playerItem.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithmSpectral;
+//  } else if ([_pitchAlgorithm isEqualToString:pitchAlgorithmTimeDomain]) {
     _playerItem.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithmTimeDomain;
-  } else if ([_pitchAlgorithm isEqualToString:pitchAlgorithmVarispeed]) {
-    _playerItem.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithmVarispeed;
-  }
+    NSLog(@"PITCH ===== ",_playerItem.audioTimePitchAlgorithm);
+//  } else if ([_pitchAlgorithm isEqualToString:pitchAlgorithmVarispeed]) {
+//    _playerItem.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithmVarispeed;
+//  }
 
 }
 
