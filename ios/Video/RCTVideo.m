@@ -3036,7 +3036,7 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
                 NSLog(@"remote");
             if (certificateStringUrl != nil) {
                 NSURL *certificateURL = [NSURL URLWithString:[certificateStringUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                     NSData *certificateData = [NSData dataWithContentsOfURL:certificateURL];
                     if ([self->_drm objectForKey:@"base64Certificate"]) {
                         certificateData = [[NSData alloc] initWithBase64EncodedData:certificateData options:NSDataBase64DecodingIgnoreUnknownCharacters];
@@ -3196,7 +3196,7 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
                         [self finishLoadingWithError:licenseError];
                         self->_requestingCertificateErrored = YES;
                     }
-                });
+                //});
                 return YES;
             } else {
                 NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
