@@ -241,13 +241,25 @@ class ReactExoplayerView extends FrameLayout implements
                          WritableMap payload = Arguments.createMap();
                             payload.putDouble("getTotalPlayTimeMs", playbackStatsListener.getPlaybackStats().getTotalPlayTimeMs());
                          themedReactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("onPlayedTime", payload);
-                        //   Log.d(TAG, "handleMessage: getTotalPlayTimeMs "+playbackStatsListener.getPlaybackStats().getTotalPlayTimeMs());
-                        saveTotalPlayedTime(playbackStatsListener.getPlaybackStats().getTotalPlayTimeMs());
+                         Log.d(TAG, "handleMessage: getMeanSeekTimeMs "+playbackStatsListener.getPlaybackStats().getMeanSeekTimeMs());
+                        Log.d(TAG, "handleMessage: getMeanPlayTimeMs "+playbackStatsListener.getPlaybackStats().getMeanPlayTimeMs());
+                        Log.d(TAG, "handleMessage: getMeanJoinTimeMs "+playbackStatsListener.getPlaybackStats().getMeanJoinTimeMs());
+                        Log.d(TAG, "handleMessage: getMeanPauseBufferCount "+playbackStatsListener.getPlaybackStats().getMeanPauseBufferCount());
+                        Log.d(TAG, "handleMessage: getMeanSingleSeekTimeMs "+playbackStatsListener.getPlaybackStats().getMeanSingleSeekTimeMs());
+
+                        Log.d(TAG, "handleMessage: getMeanSingleSeekTimeMs "+playbackStatsListener.getPlaybackStats().getMeanSingleSeekTimeMs());
+
                         long pos = player.getCurrentPosition();
+
+                        saveTotalPlayedTime(playbackStatsListener.getPlaybackStats().getTotalPlayTimeMs() , pos);
                         long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
-                        Log.d(TAG, "handleMessage: " + bufferedDuration);
+                        Log.d(TAG, "player.getDuration(): " + player.getDuration());
+                        Log.d(TAG, "pos: " + pos);
+
                         eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos));
                         msg = obtainMessage(SHOW_PROGRESS);
+                        Log.d(TAG, "msg: " + msg);
+
                         sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
                     }
                     break;
@@ -257,10 +269,12 @@ class ReactExoplayerView extends FrameLayout implements
     private static volatile int total = 0;
 
 
-    private void saveTotalPlayedTime(long totalPlayTimeMs) {
+    private void saveTotalPlayedTime(long totalPlayTimeMs , long pos) {
         Log.d(TAG, "saveTotalPlayedTime: " + totalPlayTimeMs);
         SharedPreferences.Editor editor = getContext().getSharedPreferences("globaldata", MODE_PRIVATE).edit();
         editor.putLong("totalPlayTimeMs", totalPlayTimeMs);
+        editor.putLong("currentPositionMs", pos);
+
         editor.apply();
     }
 
@@ -285,8 +299,8 @@ class ReactExoplayerView extends FrameLayout implements
         SharedPreferences prefs = themedReactContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor e = prefs.edit();
         Log.d(TAG, "setDownloadState: "+state);
-    e.putInt("DownloadState",state);
-    e.apply();
+        e.putInt("DownloadState",state);
+        e.apply();
 
 
 
@@ -360,6 +374,14 @@ class ReactExoplayerView extends FrameLayout implements
         SharedPreferences myPrefs;
         myPrefs = themedReactContext.getSharedPreferences("globaldata", MODE_PRIVATE);
         return TimeUnit.MILLISECONDS.toSeconds(myPrefs.getLong("totalPlayTimeMs", 0));
+    }
+
+    private double getCurrentTime() {
+        Log.d(TAG, "getCurrentTime: ");
+        //Get Preferenece
+        SharedPreferences myPrefs;
+        myPrefs = themedReactContext.getSharedPreferences("globaldata", MODE_PRIVATE);
+        return TimeUnit.MILLISECONDS.toSeconds(myPrefs.getLong("currentPositionMs", 0));
     }
 
     public double getPositionInFirstPeriodMsForCurrentWindow(long currentPosition) {
@@ -639,10 +661,12 @@ class ReactExoplayerView extends FrameLayout implements
         JSONArray array=new JSONArray();
         Log.d(TAG, "getTotalPlayedTime: " + getTotalPlayedTime());
         int valuePlayed = (int)  getTotalPlayedTime();
+        int closedAt = (int) getCurrentTime();
 
         try {
             jsonObject.put("chapter_id", currentchapterId);
             jsonObject.put("time", valuePlayed);
+            jsonObject.put("closed_at", closedAt);
             array.put(jsonObject);
             jsonObjectBody.put("reads", array);
         } catch (JSONException e) {
@@ -651,7 +675,7 @@ class ReactExoplayerView extends FrameLayout implements
 
 
 
-        AndroidNetworking.post("https://swann.k8s.satoripop.io/api/v1/chapters/read")
+        AndroidNetworking.post("https://api.swann-app.com/api/v1/chapters/read")
                 .addJSONObjectBody(jsonObjectBody)
                 .addHeaders("Authorization", token)
                 .setTag("sendChapterData")
@@ -665,7 +689,7 @@ class ReactExoplayerView extends FrameLayout implements
                         Log.d(TAG, "onResponse: " + response.toString());
                         playbackStatsListener = new PlaybackStatsListener(true, null);
                         player.addAnalyticsListener(playbackStatsListener);
-                        saveTotalPlayedTime(0);
+                        saveTotalPlayedTime(0 , 0);
                         //    Log.d(TAG, "onResponse: "+playbackStatsListener.getPlaybackStats().getTotalPlayTimeMs());
                     }
 
