@@ -1889,17 +1889,18 @@ AssetPersistenceManager *assetPersistenceManager;
     }
     [[NSUserDefaults standardUserDefaults] setFloat:durationWatched forKey:@"durationWatched"];
     for (NSString* key in notSendValue) {
-        [self sendSavedDuration:key WithDuration:notSendValue[key]];
+        [self sendSavedDuration:key WithDuration:notSendValue[key][@"time"] WithClosed:notSendValue[key][@"closed"]];
     }
     if (durationWatched && durationWatched != -1) {
         [[NSUserDefaults standardUserDefaults] setFloat:durationWatched-previousDuration forKey:@"Watched"];
+
         NSString *savedValue = [[NSNumber numberWithFloat:durationWatched-previousDuration] stringValue];
         NSString *chapID = [chapterID stringValue];
-        [self sendSavedDuration:chapID WithDuration:savedValue];
+        [self sendSavedDuration:chapID WithDuration:savedValue WithClosed:[[NSNumber numberWithFloat:CMTimeGetSeconds(_player.currentTime)] stringValue]];
     }
 }
 //Send the watched duration
-- (void)sendSavedDuration:(NSString*)chapterID WithDuration:(NSString*)savedValue{
+- (void)sendSavedDuration:(NSString*)chapterID WithDuration:(NSString*)savedValue WithClosed:(NSString *) closedAt{
     NSLog(@"sendSavedDuration");
     
     id token = [self->_source objectForKey:@"token"];
@@ -1919,15 +1920,18 @@ AssetPersistenceManager *assetPersistenceManager;
         double latdouble = [savedValue doubleValue];
 
         int vOut = (int)latdouble;
+        double closedAtdouble = [closedAt doubleValue];
 
-        NSDictionary *json = @{@"chapter_id":chapterID, @"time":@(vOut)};
+        int closedOut = (int)closedAtdouble;
+
+        NSDictionary *json = @{@"chapter_id":chapterID,@"time":[@(vOut) stringValue] ,@"closed_at":[@(closedOut) stringValue]};
         NSArray *array = @[json];
         NSDictionary *jsonBodyDict = @{@"reads":array};
 //        NSLog(@"Send response %@",jsonBodyDict);
         NSData * JsonData =[NSJSONSerialization dataWithJSONObject:jsonBodyDict options:NSJSONWritingPrettyPrinted error:nil];
 //        NSLog(@"Send JsonData %@",JsonData);
         
-        NSString *urlString = [NSString stringWithFormat:@"https://swann.k8s.satoripop.io/api/v1/chapters/read"];
+        NSString *urlString = [NSString stringWithFormat:@"https://api.swann-app.com/api/v1/chapters/read"];
 
 
         NSMutableURLRequest *urlRequest  = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:urlString]];
@@ -1961,17 +1965,17 @@ AssetPersistenceManager *assetPersistenceManager;
                         float oldValue =[[notSendValue objectForKey:chapterID] floatValue];
                         float newValue = [savedValue floatValue] ;
                         if (oldValue != newValue) {
-                            [notSendValue setValue:[NSNumber numberWithFloat:newValue + oldValue] forKey:chapterID];
+                            [notSendValue setValue:@{@"time":[NSNumber numberWithFloat:newValue + oldValue],@"closed":closedAt} forKey:chapterID];
                             [[NSUserDefaults standardUserDefaults] setObject:notSendValue forKey:@"valueNotSent"];
                         }
                     }else{
                         float newValue = [savedValue floatValue];
-                        [notSendValue setValue:[NSNumber numberWithFloat:newValue] forKey:chapterID ];
+                        [notSendValue setValue:@{@"time":[NSNumber numberWithFloat:newValue],@"closed":closedAt} forKey:chapterID ];
                         [[NSUserDefaults standardUserDefaults] setObject:notSendValue forKey:@"valueNotSent"];
                     }
                 }else{
                     float newValue = [savedValue floatValue];
-                    [notSendValue setValue:[NSNumber numberWithFloat:newValue] forKey:chapterID];
+                    [notSendValue setValue:@{@"time":[NSNumber numberWithFloat:newValue],@"closed":closedAt} forKey:chapterID];
                     [[NSUserDefaults standardUserDefaults] setObject:notSendValue forKey:@"valueNotSent"];
                 }
             }
