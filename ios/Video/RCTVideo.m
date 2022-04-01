@@ -1907,7 +1907,7 @@ AssetPersistenceManager *assetPersistenceManager;
     NSMutableDictionary *notSendValue = [[[NSUserDefaults standardUserDefaults] objectForKey:@"valueNotSent"] mutableCopy];
     NSLog(@"chapterID == %@savedValue == %@",chapterID ,savedValue);
     NSLog(@"token === %@",token);
-    if (savedValue != 0) {
+    if (savedValue.intValue > 0) {
 //        NSMutableDictionary *dict1 = [[NSMutableDictionary alloc]init];
 //        [dict1 setObject:chapterID forKey:@"chapter_id"];
 //        [dict1 setObject:savedValue forKey:@"time"];
@@ -1962,7 +1962,7 @@ AssetPersistenceManager *assetPersistenceManager;
                 if ([[NSUserDefaults standardUserDefaults] objectForKey:@"valueNotSent"]) {
                     notSendValue = [[[NSUserDefaults standardUserDefaults] objectForKey:@"valueNotSent"] mutableCopy];
                     if ( [notSendValue objectForKey:chapterID] != nil) {
-                        float oldValue =[[notSendValue objectForKey:chapterID] floatValue];
+                        float oldValue =[[[notSendValue objectForKey:chapterID] objectForKey:@"time"] floatValue];
                         float newValue = [savedValue floatValue] ;
                         if (oldValue != newValue) {
                             [notSendValue setValue:@{@"time":[NSNumber numberWithFloat:newValue + oldValue],@"closed":closedAt} forKey:chapterID];
