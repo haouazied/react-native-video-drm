@@ -1872,7 +1872,12 @@ AssetPersistenceManager *assetPersistenceManager;
     
     [super removeFromSuperview];
 }
-
+static inline BOOL CBIsEmpty(id obj) {
+    return obj == nil
+	|| (NSNull *)obj == [NSNull null]
+	|| ([obj respondsToSelector:@selector(length)] && [obj length] == 0)
+	|| ([obj respondsToSelector:@selector(count)] && [obj count] == 0);
+}
 #pragma mark - Export
 //Save the watched duration
 - (void)saveDurationWatched{
@@ -1881,7 +1886,7 @@ AssetPersistenceManager *assetPersistenceManager;
     NSMutableDictionary *notSendValue = [[[NSUserDefaults standardUserDefaults] objectForKey:@"valueNotSent"] mutableCopy];
     NSString *previousDurationWatched = [[NSUserDefaults standardUserDefaults] stringForKey:@"durationWatched"];
     id chapterID = [self->_source objectForKey:@"chapterID"];
-    if (chapterID != nil) return;
+    if (CBIsEmpty(chapterID)) return;
     float previousDuration = [previousDurationWatched floatValue];
     NSLog(@"NotSentValue%@",notSendValue);
     NSTimeInterval durationWatched = 0.0;
