@@ -1881,6 +1881,7 @@ AssetPersistenceManager *assetPersistenceManager;
     NSMutableDictionary *notSendValue = [[[NSUserDefaults standardUserDefaults] objectForKey:@"valueNotSent"] mutableCopy];
     NSString *previousDurationWatched = [[NSUserDefaults standardUserDefaults] stringForKey:@"durationWatched"];
     id chapterID = [self->_source objectForKey:@"chapterID"];
+    if (chapterID != nil) return;
     float previousDuration = [previousDurationWatched floatValue];
     NSLog(@"NotSentValue%@",notSendValue);
     NSTimeInterval durationWatched = 0.0;
